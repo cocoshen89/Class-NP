@@ -38,6 +38,7 @@ struct {
 	{"htm", "text/html" },
 	{"html","text/html" },
 	{"exe","text/plain" },
+	{"mp3","audio/mp3" },
 	{0,0} };
 int open_listenfd();
 void load_file (int fd,char* buffer,int ret);

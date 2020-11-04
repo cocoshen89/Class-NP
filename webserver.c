@@ -22,7 +22,7 @@
 #include <arpa/inet.h>
 
 #define PORT "8080" //  port
-#define BUFSIZE 8096
+#define BUFSIZE 200000
 
 struct {
 	char *ext;
@@ -213,7 +213,7 @@ void load_file (int fd,char* buffer,int ret)
 	int download_fd = open(store,O_CREAT|O_WRONLY|O_TRUNC|O_SYNC,S_IRWXO|S_IRWXU|S_IRWXG);
 
 	write(download_fd,tmp,BUFSIZE-(tmp-buffer));
-	while((ret=read(fd,buffer,BUFSIZE)) > 0)
+	while((ret=read(fd,buffer,BUFSIZE)) > 0 )
 	{
 		//ret=read(fd,buffer,BUFSIZE);
 		write(download_fd,buffer,ret);

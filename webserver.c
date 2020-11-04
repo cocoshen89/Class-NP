@@ -192,50 +192,32 @@ int open_listenfd()
 void load_file (int fd,char* buffer,int ret)
 {
 	//check upload file
-	char *tmp = strstr (buffer,"filename");
+	char *tmp = strstr (buffer,"filename=\"");
 	if (tmp == 0 ) return;
-	char filename[BUFSIZE+1],data[BUFSIZE+1],store[BUFSIZE+1];
-	//init
-	memset (filename,'\0',BUFSIZE);
-	memset (data,'\0',BUFSIZE);
-	memset (store,'\0',BUFSIZE);
+	char filename[BUFSIZE+1],data[BUFSIZE+1],store[BUFSIZE+1];	
 	//get file name
-	char *a,*b;
-	a = strstr(tmp,"\"");
-	b = strstr(a+1,"\"");
-	strncpy (filename,a+1,b-a-1);
-	strcat (store,"upload/");
-	strcat (store,filename);
-	a = strstr(tmp,"\n");
-	b = strstr(a+1,"\n");
-	a = strstr(b+1,"\n");
-	b = strstr(a+1,"---------------------------");
+	tmp+=10;
+	int i=7;
+	strcpy(store,"upload/");
+	char *e=strstr(tmp,"\""),*j;
+	for(j=tmp;j!=e;i++,j++)
+	{
+		store[i] = *j;
+	}
+	store[i]=0;
+	tmp = strstr(tmp,"\n");
+	tmp = strstr(tmp+1,"\n");
+	tmp = strstr(tmp+1,"\n");
+	tmp++;
 
 	int download_fd = open(store,O_CREAT|O_WRONLY|O_TRUNC|O_SYNC,S_IRWXO|S_IRWXU|S_IRWXG);
 
-	char t[BUFSIZE+1];
-	int last_write,last_ret;
-	if (b != 0)
+	write(download_fd,tmp,BUFSIZE-(tmp-buffer));
+	while((ret=read(fd,buffer,BUFSIZE)) > 0)
 	{
-		write(download_fd,a+1,b-a-3);
+		//ret=read(fd,buffer,BUFSIZE);
+		write(download_fd,buffer,ret);
 	} 
-	else
-	{
-		int start = (int )(a - &buffer[0])+1;
-		last_write = write(download_fd,a+1,ret -start -61);
-		last_ret = ret;
-		memcpy (t,a+1+last_write,61);
-
-		while ((ret=read(fd, buffer,BUFSIZE))>0)
-		{
-			write(download_fd,t,61);
-			last_write = write(download_fd,buffer,ret - 61);
-			memcpy (t,buffer+last_write,61);
-			last_ret = ret;
-			if (ret!=8096)
-				break;
-		}
-	}
 	close(download_fd);
 	fprintf (stderr,"client: %d UPLOAD FILE NAME :%s\n\n",fd,filename);
 	return ;
